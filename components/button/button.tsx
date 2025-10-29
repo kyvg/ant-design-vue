@@ -69,7 +69,7 @@ export default defineComponent({
     watch(
       loadingOrDelay,
       val => {
-        clearTimeout(delayTimeoutRef.value);
+        cleanupTimer()
         if (typeof loadingOrDelay.value === 'number') {
           delayTimeoutRef.value = setTimeout(() => {
             innerLoading.value = val;
@@ -149,6 +149,13 @@ export default defineComponent({
       return child;
     };
 
+    const cleanupTimer = () => {
+      if (delayTimeoutRef.value) {
+        clearTimeout(delayTimeoutRef.value);
+        delayTimeoutRef.value = undefined;
+      }
+    }
+
     watchEffect(() => {
       devWarning(
         !(props.ghost && isUnBorderedButtonType(props.type)),
@@ -160,9 +167,7 @@ export default defineComponent({
     onMounted(fixTwoCNChar);
     onUpdated(fixTwoCNChar);
 
-    onBeforeUnmount(() => {
-      delayTimeoutRef.value && clearTimeout(delayTimeoutRef.value);
-    });
+    onBeforeUnmount(cleanupTimer);
 
     const focus = () => {
       buttonNodeRef.value?.focus();
